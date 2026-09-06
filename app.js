@@ -288,6 +288,7 @@ function bindEvents() {
 }
 
 async function initialize() {
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
   bindEvents();
   try {
     const response = await fetch("initial-inventory.json");
@@ -302,7 +303,6 @@ async function initialize() {
     element("results-subtitle").textContent = "Open this application through its local web address so the data file can load.";
     element("results").innerHTML = `<div class="empty-state"><strong>Unable to load the source inventory.</strong>The application shell is ready, but its supplied inventory file was not available.</div>`;
   }
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 }
 
 initialize();
