@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a2433" />
+    <meta name="description" content="Thumby ERP inventory pilot" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Thumby ERP</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Thumby ERP navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">T</div>
+          <div>
+            <strong>Thumby ERP</strong>
+            <span>Inventory pilot</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Main navigation">
+          <button class="nav-link active" data-view="search" type="button"><span>⌕</span> Search stock</button>
+          <button class="nav-link" data-view="dashboard" type="button"><span>▦</span> Overview</button>
+          <button class="nav-link" data-view="updates" type="button"><span>↕</span> Daily updates</button>
+          <button class="nav-link" data-view="quality" type="button"><span>✓</span> Data review</button>
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="dot amber"></span>
+          <p><strong>Import pilot</strong><br />Source values need physical verification before they become live master stock.</p>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="view-kicker">Inventory search</p>
+            <h1 id="view-title">Find stock instantly</h1>
+          </div>
+          <div class="topbar-actions">
+            <span class="sync-state" id="sync-state"><span class="dot amber"></span> Device pilot</span>
+            <button class="button primary" id="new-movement" type="button">+ Stock update</button>
+          </div>
+        </header>
+
+        <section class="view active" id="search-view" aria-labelledby="view-title">
+          <div class="search-panel">
+            <label class="search-box" for="search-input">
+              <span aria-hidden="true">⌕</span>
+              <input id="search-input" type="search" autocomplete="off" placeholder="Search part number, serial, batch, description or bin" />
+              <kbd>Enter</kbd>
+            </label>
+            <div class="filter-row">
+              <label>Base
+                <select id="base-filter"><option value="all">All bases</option></select>
+              </label>
+              <label>Record type
+                <select id="kind-filter"><option value="all">All source records</option></select>
+              </label>
+              <label>Availability
+                <select id="availability-filter">
+                  <option value="all">All availability</option>
+                  <option value="available">Numeric source balance</option>
+                  <option value="review">Needs quantity review</option>
+                </select>
+              </label>
+              <button class="text-button" id="reset-filters" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="search-guidance">
+            <span class="signal">Exact P/N first</span>
+            <p>Spaces, hyphens, dots, and slashes are ignored when matching part numbers. Verified alternate P/Ns will appear here once approved.</p>
+          </div>
+
+          <div class="results-heading">
+            <div><h2 id="results-title">Loading inventory records…</h2><p id="results-subtitle">Your supplied stock files are being prepared for search.</p></div>
+            <button class="button quiet" id="download-results" type="button" disabled>Download results</button>
+          </div>
+          <div id="results" class="results" aria-live="polite"></div>
+        </section>
+
+        <section class="view" id="dashboard-view" aria-label="Overview">
+          <div class="notice">
+            <span class="notice-icon">!</span>
+            <div><strong>Source-led pilot data</strong><p>Balances shown here are values from the supplied spreadsheets. They become trusted live stock only after base-level reconciliation.</p></div>
+          </div>
+          <div class="metric-grid" id="metric-grid"></div>
+          <section class="panel split-panel">
+            <div>
+              <div class="section-heading"><div><p class="eyebrow">Coverage</p><h2>Records by base</h2></div></div>
+              <div id="base-summary" class="base-summary"></div>
+            </div>
+            <div>
+              <div class="section-heading"><div><p class="eyebrow">Today</p><h2>Update queue</h2></div></div>
+              <div id="movement-summary" class="movement-summary"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="updates-view" aria-label="Daily stock updates">
+          <div class="notice blue">
+            <span class="notice-icon">i</span>
+            <div><strong>Daily update workspace</strong><p>Use this to record receipts, issues, returns, transfers, adjustments, and counts. In this pilot, updates remain on this device and are marked pending approval.</p></div>
+          </div>
+          <div class="section-heading updates-heading">
+            <div><p class="eyebrow">Local queue</p><h2>Pending stock movements</h2></div>
+            <button class="button primary" id="new-movement-secondary" type="button">+ New update</button>
+          </div>
+          <div class="panel table-panel">
+            <div class="table-wrap"><table><thead><tr><th>Created</th><th>Type</th><th>Part number</th><th>Quantity</th><th>Location</th><th>Reference</th><th>Status</th></tr></thead><tbody id="movement-table"></tbody></table></div>
+          </div>
+          <div class="export-row"><p>Keep a daily record while shared online sync is being connected.</p><button class="button quiet" id="download-movements" type="button">Download daily updates</button></div>
+        </section>
+
+        <section class="view" id="quality-view" aria-label="Data review">
+          <div class="quality-intro"><p class="eyebrow">Before go-live</p><h2>Resolve source data exceptions</h2><p>The search works against all imported source records. This review queue prevents duplicate items, wrong balances, and unclear statuses from becoming permanent ERP data.</p></div>
+          <div class="quality-grid">
+            <article><strong>439</strong><span>Part-number candidates with description differences</span><p>Approve one master description or mark the records as distinct items.</p></article>
+            <article><strong>68</strong><span>Formatting variants</span><p>Examples include spaces, hyphens, and slashes used differently for the same candidate P/N.</p></article>
+            <article><strong>797</strong><span>Identifiers found in more than one source</span><p>Keep them as separate location, lot, or batch records until reviewed.</p></article>
+            <article><strong>0</strong><span>Dedicated alternate-P/N columns</span><p>Add approved alternate P/Ns centrally instead of guessing from free text.</p></article>
+          </div>
+          <section class="panel checklist-panel">
+            <div class="section-heading"><div><p class="eyebrow">Required decisions</p><h2>Go-live checklist</h2></div></div>
+            <ol>
+              <li>Confirm each base, rack, bin, shelf, and the meaning of the unlabelled source columns.</li>
+              <li>Confirm whether each sheet is a receipt ledger or an opening/current-balance snapshot.</li>
+              <li>Approve P/N aliases and one standard description per item.</li>
+              <li>Complete a physical count and approve the opening balance by base.</li>
+            </ol>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="movement-dialog" aria-labelledby="movement-title">
+      <form method="dialog" id="movement-form">
+        <div class="dialog-header"><div><p class="eyebrow">Stock movement</p><h2 id="movement-title">Create daily update</h2></div><button class="icon-button" id="close-dialog" type="button" aria-label="Close">×</button></div>
+        <p class="dialog-copy">Pick an imported source record, then save a controlled draft for approval.</p>
+        <input id="movement-record-id" type="hidden" />
+        <label class="field">Item
+          <input id="movement-item" type="text" placeholder="Search above, then select Update" readonly required />
+        </label>
+        <div class="form-grid">
+          <label class="field">Movement type
+            <select id="movement-type" required><option value="Receipt">Receipt</option><option value="Issue">Issue</option><option value="Return">Return</option><option value="Transfer">Transfer</option><option value="Adjustment">Adjustment</option><option value="Stock count">Stock count</option></select>
+          </label>
+          <label class="field">Quantity
+            <input id="movement-quantity" type="number" inputmode="decimal" min="0.001" step="any" placeholder="0" required />
+          </label>
+          <label class="field">Location
+            <input id="movement-location" type="text" placeholder="Bin / rack / shelf" required />
+          </label>
+          <label class="field">Reference
+            <input id="movement-reference" type="text" placeholder="Challan, ARC, count ref." />
+          </label>
+        </div>
+        <label class="field">Reason or note
+          <textarea id="movement-note" rows="3" placeholder="Why is this stock changing?"></textarea>
+        </label>
+        <div class="dialog-actions"><button class="button quiet" id="cancel-dialog" type="button">Cancel</button><button class="button primary" type="submit">Save pending update</button></div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js" defer></script>
+  </body>
+</html>
