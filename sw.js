@@ -1,4 +1,4 @@
-const CACHE_NAME = "thumby-erp-v7";
+const CACHE_NAME = "thumby-erp-v8";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./initial-inventory.json"];
 
 self.addEventListener("install", (event) => {
