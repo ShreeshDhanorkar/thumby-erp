@@ -297,8 +297,8 @@ function bindEvents() {
 }
 
 async function initialize() {
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=7", { scope: "/" }).catch(() => {});
-  bindEvents();
+  
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=8", { scope: "/" }).catch(() => {});
   try {
     const response = await fetch("initial-inventory.json");
     if (!response.ok) throw new Error("Inventory data could not load");
