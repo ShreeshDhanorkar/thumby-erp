@@ -57,6 +57,11 @@ function scoreRecord(record, query) {
   return 0;
 }
 
+function availabilityRank(record) {
+  if (record.availableNumeric === null) return 0;
+  return Number(record.availableNumeric) > 0 ? 2 : 1;
+}
+
 function currentFilters() {
   return {
     query: element("search-input").value,
@@ -79,6 +84,10 @@ function filteredRecords() {
   return matches.sort((a, b) => {
     const difference = scoreRecord(b, filters.query) - scoreRecord(a, filters.query);
     if (difference) return difference;
+    const availabilityDifference = availabilityRank(b) - availabilityRank(a);
+    if (availabilityDifference) return availabilityDifference;
+    const quantityDifference = (Number(b.availableNumeric) || 0) - (Number(a.availableNumeric) || 0);
+    if (quantityDifference) return quantityDifference;
     return a.partNumber.localeCompare(b.partNumber);
   });
 }
