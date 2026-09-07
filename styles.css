@@ -190,7 +190,7 @@ dialog form { padding: 1.3rem; }
 }
 
 /* Phone/WebView layout: keep every control inside the device viewport. */
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .main-content { padding: 1rem .75rem 2rem; }
   .topbar { display: block; margin-bottom: 1rem; }
   .topbar-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin-top: .8rem; width: 100%; }
