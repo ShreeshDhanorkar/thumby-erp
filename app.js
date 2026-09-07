@@ -297,7 +297,7 @@ function bindEvents() {
 }
 
 async function initialize() {
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=7", { scope: "/" }).catch(() => {});
   bindEvents();
   try {
     const response = await fetch("initial-inventory.json");
