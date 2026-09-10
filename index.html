@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-            
     <meta name="theme-color" content="#0a2433" />
     <meta name="description" content="Thumby ERP inventory pilot" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -23,7 +22,6 @@
         <nav class="nav-list" aria-label="Main navigation">
           <button class="nav-link active" data-view="search" type="button"><span>⌕</span> Search stock</button>
           <button class="nav-link" data-view="dashboard" type="button"><span>▦</span> Overview</button>
-          <button class="nav-link" data-view="updates" type="button"><span>↕</span> Daily updates</button>
           <button class="nav-link" data-view="quality" type="button"><span>✓</span> Data review</button>
         </nav>
 
@@ -40,19 +38,18 @@
             <h1 id="view-title">Find stock instantly</h1>
           </div>
           <div class="topbar-actions">
-            <span class="sync-state" id="sync-state"><span class="dot amber"></span> Device pilot</span>
+            <span class="sync-state" id="sync-state"><span class="dot green"></span> View-only demo</span>
             <a class="button download-app" href="Thumby_ERP_Mobile.apk" download>↓ Download Android app</a>
-            <button class="button primary" id="new-movement" type="button">+ Stock update</button>
           </div>
         </header>
 
         <section class="view active" id="search-view" aria-labelledby="view-title">
           <div class="search-panel">
-            <label class="search-box" for="search-input">
+            <div class="search-box">
               <span aria-hidden="true">⌕</span>
-              <input id="search-input" type="search" autocomplete="off" placeholder="Search part number, serial, batch, description or bin" />
-              <kbd>Enter</kbd>
-            </label>
+              <input id="search-input" type="search" autocomplete="off" aria-label="Search inventory" placeholder="Search part number, serial, batch, description or bin" />
+              <button class="button primary search-action" id="run-search" type="button">Search</button>
+            </div>
             <div class="filter-row">
               <label>Base
                 <select id="base-filter"><option value="all">All bases</option></select>
@@ -95,25 +92,10 @@
               <div id="base-summary" class="base-summary"></div>
             </div>
             <div>
-              <div class="section-heading"><div><p class="eyebrow">Today</p><h2>Update queue</h2></div></div>
-              <div id="movement-summary" class="movement-summary"></div>
+              <div class="section-heading"><div><p class="eyebrow">Access</p><h2>Demo permissions</h2></div></div>
+              <div class="movement-summary"><strong>View only</strong>Stock additions, edits, and movements are disabled in this demo.</div>
             </div>
           </section>
-        </section>
-
-        <section class="view" id="updates-view" aria-label="Daily stock updates">
-          <div class="notice blue">
-            <span class="notice-icon">i</span>
-            <div><strong>Daily update workspace</strong><p>Use this to record receipts, issues, returns, transfers, adjustments, and counts. In this pilot, updates remain on this device and are marked pending approval.</p></div>
-          </div>
-          <div class="section-heading updates-heading">
-            <div><p class="eyebrow">Local queue</p><h2>Pending stock movements</h2></div>
-            <button class="button primary" id="new-movement-secondary" type="button">+ New update</button>
-          </div>
-          <div class="panel table-panel">
-            <div class="table-wrap"><table><thead><tr><th>Created</th><th>Type</th><th>Part number</th><th>Quantity</th><th>Location</th><th>Reference</th><th>Status</th></tr></thead><tbody id="movement-table"></tbody></table></div>
-          </div>
-          <div class="export-row"><p>Keep a daily record while shared online sync is being connected.</p><button class="button quiet" id="download-movements" type="button">Download daily updates</button></div>
         </section>
 
         <section class="view" id="quality-view" aria-label="Data review">
@@ -137,36 +119,7 @@
       </main>
     </div>
 
-    <dialog id="movement-dialog" aria-labelledby="movement-title">
-      <form method="dialog" id="movement-form">
-        <div class="dialog-header"><div><p class="eyebrow">Stock movement</p><h2 id="movement-title">Create daily update</h2></div><button class="icon-button" id="close-dialog" type="button" aria-label="Close">×</button></div>
-        <p class="dialog-copy">Pick an imported source record, then save a controlled draft for approval.</p>
-        <input id="movement-record-id" type="hidden" />
-        <label class="field">Item
-          <input id="movement-item" type="text" placeholder="Search above, then select Update" readonly required />
-        </label>
-        <div class="form-grid">
-          <label class="field">Movement type
-            <select id="movement-type" required><option value="Receipt">Receipt</option><option value="Issue">Issue</option><option value="Return">Return</option><option value="Transfer">Transfer</option><option value="Adjustment">Adjustment</option><option value="Stock count">Stock count</option></select>
-          </label>
-          <label class="field">Quantity
-            <input id="movement-quantity" type="number" inputmode="decimal" min="0.001" step="any" placeholder="0" required />
-          </label>
-          <label class="field">Location
-            <input id="movement-location" type="text" placeholder="Bin / rack / shelf" required />
-          </label>
-          <label class="field">Reference
-            <input id="movement-reference" type="text" placeholder="Challan, ARC, count ref." />
-          </label>
-        </div>
-        <label class="field">Reason or note
-          <textarea id="movement-note" rows="3" placeholder="Why is this stock changing?"></textarea>
-        </label>
-        <div class="dialog-actions"><button class="button quiet" id="cancel-dialog" type="button">Cancel</button><button class="button primary" type="submit">Save pending update</button></div>
-      </form>
-    </dialog>
-
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-        <script src="app.js?v=8" defer></script>
+    <script src="app.js?v=12" defer></script>
   </body>
 </html>

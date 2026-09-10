@@ -19,6 +19,7 @@
 }
 
 * { box-sizing: border-box; }
+html, body { width: 100%; max-width: 100%; }
 html { background: var(--canvas); }
 body { margin: 0; min-width: 320px; background: var(--canvas); overflow-x: hidden; }
 button, input, select, textarea { font: inherit; }
@@ -70,6 +71,7 @@ h2 { font-size: 1.16rem; letter-spacing: -.015em; margin: 0; }
 .search-box:focus-within { border-color: var(--teal); box-shadow: 0 0 0 4px rgba(11,124,124,.11); }
 .search-box > span { color: var(--teal); font-size: 1.65rem; transform: translateY(-.08rem); }
 .search-box input { width: 100%; padding: 1.02rem 0; border: 0; outline: 0; font-size: 1.04rem; background: transparent; color: var(--ink); }
+.search-action { flex: 0 0 auto; min-height: 2.45rem; padding: .55rem .95rem; }
 kbd { color: var(--muted); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: .3rem; padding: .18rem .38rem; font-size: .72rem; }
 .filter-row { display: flex; align-items: end; flex-wrap: wrap; gap: .72rem 1.1rem; padding-top: 1rem; }
 .filter-row label { color: var(--muted); font-size: .76rem; font-weight: 750; display: grid; gap: .32rem; }
@@ -199,7 +201,7 @@ dialog form { padding: 1.3rem; }
   .search-panel { padding: .8rem; border-radius: .95rem; }
   .search-box { min-width: 0; gap: .5rem; padding-inline: .65rem; }
   .search-box input { min-width: 0; font-size: .94rem; }
-  .search-box kbd { display: none; }
+  .search-action { min-height: 2.35rem; padding: .5rem .75rem; }
   .filter-row { display: grid; grid-template-columns: 1fr; gap: .62rem; padding-top: .8rem; }
   .filter-row label, .filter-row select { width: 100%; min-width: 0; }
   .filter-row select { min-height: 2.7rem; }

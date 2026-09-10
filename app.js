@@ -1,14 +1,11 @@
 const state = {
   records: [],
-  movements: JSON.parse(localStorage.getItem("thumby-erp-movements-v1") || "[]"),
   currentView: "search",
-  selectedRecord: null,
 };
 
 const viewContent = {
   search: { kicker: "Inventory search", title: "Find stock instantly" },
   dashboard: { kicker: "ERP overview", title: "Inventory pilot overview" },
-  updates: { kicker: "Daily workflow", title: "Controlled stock updates" },
   quality: { kicker: "Data readiness", title: "Prepare for go-live" },
 };
 
@@ -129,10 +126,9 @@ function renderResults() {
         <p class="description">${escapeHTML(description)}</p>
         <div class="record-meta">${recordMeta(record)}</div>
       </div>
-      <div class="result-side"><strong>${escapeHTML(available)}</strong><small>${availableLabel} · ${escapeHTML(record.recordKind)}</small><button class="button quiet update-record" type="button" data-record-id="${escapeHTML(record.id)}">Update stock</button></div>
+      <div class="result-side"><strong>${escapeHTML(available)}</strong><small>${availableLabel} · ${escapeHTML(record.recordKind)}</small></div>
     </article>`;
   }).join("");
-  document.querySelectorAll(".update-record").forEach((button) => button.addEventListener("click", () => openMovement(button.dataset.recordId)));
 }
 
 function fillFilters() {
@@ -151,80 +147,13 @@ function renderDashboard() {
     [numberFormat.format(state.records.length), "Searchable source records", "Merged continuation rows preserved"],
     [numberFormat.format(uniquePartCandidates), "P/N candidates", "Awaiting master-data approval"],
     [numberFormat.format(locations), "Location labels", "Need governed location mapping"],
-    [numberFormat.format(state.movements.length), "Local daily updates", "Pending controller approval"],
+    ["View only", "Access mode", "Stock changes disabled"],
   ];
   element("metric-grid").innerHTML = metrics.map(([value, label, note]) => `<article class="metric"><span>${label}</span><strong>${value}</strong><em>${note}</em></article>`).join("");
   const counts = bases.map((base) => ({ base, count: state.records.filter((record) => record.base === base).length })).sort((a, b) => b.count - a.count);
   const largest = Math.max(...counts.map((entry) => entry.count));
   element("base-summary").innerHTML = counts.map(({ base, count }) => `<div class="base-line"><strong>${escapeHTML(base)}</strong><div class="bar"><span style="width:${Math.round((count / largest) * 100)}%"></span></div><b>${numberFormat.format(count)}</b></div>`).join("");
-  element("movement-summary").innerHTML = state.movements.length
-    ? `<strong>${numberFormat.format(state.movements.length)}</strong>movement${state.movements.length === 1 ? "" : "s"} saved on this device. Export the queue or connect the central database to send for approval.`
-    : `<strong>No updates yet</strong>Create the first controlled receipt, issue, transfer, adjustment, return, or stock-count draft.`;
-  element("sync-state").innerHTML = `<span class="dot ${numericAvailability ? "amber" : "green"}"></span> Device pilot`;
-}
-
-function saveMovements() {
-  localStorage.setItem("thumby-erp-movements-v1", JSON.stringify(state.movements));
-}
-
-function renderMovements() {
-  const target = element("movement-table");
-  if (!state.movements.length) {
-    target.innerHTML = `<tr><td class="table-empty" colspan="7">No daily stock updates have been saved on this device.</td></tr>`;
-    renderDashboard();
-    return;
-  }
-  target.innerHTML = [...state.movements].reverse().map((movement) => `<tr>
-    <td>${escapeHTML(movement.createdAt)}</td><td><strong>${escapeHTML(movement.type)}</strong></td><td>${escapeHTML(movement.partNumber)}</td><td>${escapeHTML(movement.quantity)}</td><td>${escapeHTML(movement.location)}</td><td>${escapeHTML(movement.reference || "—")}</td><td><span class="status-badge">Pending approval</span></td>
-  </tr>`).join("");
-  renderDashboard();
-}
-
-function openMovement(recordId) {
-  const record = state.records.find((item) => item.id === recordId);
-  if (!record) {
-    showToast("Select a stock record from search before creating an update.");
-    switchView("search");
-    return;
-  }
-  state.selectedRecord = record;
-  element("movement-record-id").value = record.id;
-  element("movement-item").value = `${record.partNumber} — ${record.description || "No description"}`;
-  element("movement-location").value = isBlankLike(record.location) ? "" : record.location;
-  element("movement-quantity").value = "";
-  element("movement-reference").value = record.reference || "";
-  element("movement-note").value = "";
-  element("movement-dialog").showModal();
-}
-
-function submitMovement(event) {
-  event.preventDefault();
-  const record = state.records.find((item) => item.id === element("movement-record-id").value);
-  const quantity = Number(element("movement-quantity").value);
-  if (!record || !Number.isFinite(quantity) || quantity <= 0) {
-    showToast("Choose a source record and enter a quantity greater than zero.");
-    return;
-  }
-  const movement = {
-    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-    createdAt: new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }),
-    type: element("movement-type").value,
-    quantity: element("movement-quantity").value,
-    location: element("movement-location").value.trim(),
-    reference: element("movement-reference").value.trim(),
-    note: element("movement-note").value.trim(),
-    partNumber: record.partNumber,
-    description: record.description,
-    recordId: record.id,
-    source: `${record.sourceWorkbook} / ${record.sourceSheet} / row ${record.sourceRow}`,
-    status: "Pending approval",
-  };
-  state.movements.push(movement);
-  saveMovements();
-  element("movement-dialog").close();
-  renderMovements();
-  showToast("Daily update saved on this device and marked pending approval.");
-  switchView("updates");
+  element("sync-state").innerHTML = `<span class="dot green"></span> View-only demo`;
 }
 
 function toCSV(rows, headers) {
@@ -250,22 +179,14 @@ function downloadResults() {
   downloadFile("thumby-erp-search-results.csv", toCSV(rows, ["base", "partNumber", "description", "location", "serialNumber", "batchNumber", "sourceAvailable", "sourceQuantity", "expiry", "sourceWorkbook", "sourceSheet", "sourceRow"]));
 }
 
-function downloadMovements() {
-  if (!state.movements.length) {
-    showToast("There are no daily updates to download yet.");
-    return;
-  }
-  downloadFile("thumby-erp-daily-updates.csv", toCSV(state.movements, ["createdAt", "type", "partNumber", "description", "quantity", "location", "reference", "note", "source", "status"]));
-}
-
 function switchView(view) {
+  if (!viewContent[view]) return;
   state.currentView = view;
   document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === `${view}-view`));
   document.querySelectorAll(".nav-link").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   element("view-kicker").textContent = viewContent[view].kicker;
   element("view-title").textContent = viewContent[view].title;
   if (view === "dashboard") renderDashboard();
-  if (view === "updates") renderMovements();
 }
 
 let toastTimer;
@@ -280,6 +201,10 @@ function showToast(message) {
 function bindEvents() {
   document.querySelectorAll(".nav-link").forEach((button) => button.addEventListener("click", () => switchView(button.dataset.view)));
   ["search-input", "base-filter", "kind-filter", "availability-filter"].forEach((id) => element(id).addEventListener(id === "search-input" ? "input" : "change", renderResults));
+  element("run-search").addEventListener("click", renderResults);
+  element("search-input").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") renderResults();
+  });
   element("reset-filters").addEventListener("click", () => {
     element("search-input").value = "";
     element("base-filter").value = "all";
@@ -287,18 +212,12 @@ function bindEvents() {
     element("availability-filter").value = "all";
     renderResults();
   });
-  element("new-movement").addEventListener("click", () => openMovement(state.selectedRecord?.id));
-  element("new-movement-secondary").addEventListener("click", () => openMovement(state.selectedRecord?.id));
-  element("close-dialog").addEventListener("click", () => element("movement-dialog").close());
-  element("cancel-dialog").addEventListener("click", () => element("movement-dialog").close());
-  element("movement-form").addEventListener("submit", submitMovement);
   element("download-results").addEventListener("click", downloadResults);
-  element("download-movements").addEventListener("click", downloadMovements);
 }
 
 async function initialize() {
-  
-    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=8", { scope: "/" }).catch(() => {});
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=12", { scope: "/" }).catch(() => {});
+  bindEvents();
   try {
     const response = await fetch("initial-inventory.json");
     if (!response.ok) throw new Error("Inventory data could not load");
@@ -306,7 +225,7 @@ async function initialize() {
     state.records = payload.records.map((record) => ({ ...record, searchText: normalizeText([record.partNumber, record.description, record.serialNumber, record.batchNumber, record.location, record.reference].join(" ")) }));
     fillFilters();
     renderResults();
-    renderMovements();
+    renderDashboard();
   } catch (error) {
     element("results-title").textContent = "Inventory source data is unavailable";
     element("results-subtitle").textContent = "Open this application through its local web address so the data file can load.";
