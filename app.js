@@ -216,10 +216,10 @@ function bindEvents() {
 }
 
 async function initialize() {
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=12", { scope: "/" }).catch(() => {});
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=13", { scope: "/" }).catch(() => {});
   bindEvents();
   try {
-    const response = await fetch("initial-inventory.json");
+    const response = await fetch("initial-inventory.json?v=stock-v13");
     if (!response.ok) throw new Error("Inventory data could not load");
     const payload = await response.json();
     state.records = payload.records.map((record) => ({ ...record, searchText: normalizeText([record.partNumber, record.description, record.serialNumber, record.batchNumber, record.location, record.reference].join(" ")) }));
